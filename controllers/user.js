@@ -1,32 +1,65 @@
 const { request, response } = require('express');
+const bcryptjs = require('bcryptjs');
+const User = require('../models/user');
 
-const userGet = (req = request, res = response) => {
-    // http://localhost:8082/api/users?q=10
-    const { q } = req.query;
+
+const userGet = async (req = request, res = response) => {
+    const { limit = 5, from = 0 } = req.query;
+
+    const [total, users] = await Promise.all([
+        User.countDocuments({ status: true }),
+        User.find({ status: true })
+            .skip(Number(from))
+            .limit(Number(limit))
+    ]);
+
     res.json({
         msg: 'get API',
-        q
+        total,
+        users
     });
 };
 
-const userPut = ('/', (req = request, res = response) => {
-    const id = req.params.id;
-    res.json({
-        msg: 'put API',
-        id
-    });
+const userPut = ('/', async (req = request, res = response) => {
+    const { id } = req.params;
+
+
+    const { password, google, email, _id, ...rest } = req.body;
+    if (password) {
+        const salt = bcryptjs.genSaltSync();
+        rest.password = bcryptjs.hashSync(password, salt);
+    }
+
+    const user = await User.findByIdAndUpdate(id, rest);
+    res.json({ user });
 })
-const userPost = ('/', (req = request, res = response) => {
-    const { nombre, edad } = req.body;
+const userPost = ('/', async (req = request, res = response) => {
+
+    const { name, email, password, role } = req.body;
+    const newUser = new User({ name, email, password, role });
+
+    // check if email exists
+
+
+    // password encrypted
+    const salt = bcryptjs.genSaltSync();
+    newUser.password = bcryptjs.hashSync(password, salt);
+
+    await newUser.save();
+
 
     res.json({
         msg: 'post API - userPost',
-        nombre, edad
+        newUser
     });
 })
-const userDelete = ('/', (req = request, res = response) => {
+const userDelete = ('/', async (req = request, res = response) => {
+    const { id } = req.params;
+    const user = await User.findByIdAndUpdate(id, {status : false});
+
     res.json({
-        msg: 'delete API'
+        msg: 'delete API',
+        user
     });
 })
 
