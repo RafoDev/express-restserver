@@ -1,5 +1,4 @@
-const Role = require('../models/role');
-const User = require('../models/user');
+const { User, Role } = require('../models');
 
 const roleIsValid = async (role = '') => {
     const existeRol = await Role.findOne({ role });

@@ -1,5 +1,6 @@
 const jwt = require('jsonwebtoken');
-const User = require('../models/user');
+const { User } = require('../models');
+
 
 const validateJWT = async (req, res, next) => {
     const token = req.header('x-token');
@@ -12,7 +13,7 @@ const validateJWT = async (req, res, next) => {
         const { uid } = jwt.verify(token, process.env.SECRET_KEY);
 
         const user = await User.findById(uid);
-    
+        
         // User exists
         if(!user){
             return res.status(401).json({

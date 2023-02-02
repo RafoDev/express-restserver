@@ -1,8 +1,9 @@
 const { response } = require("express");
-const User = require("../models/user");
 const bcryptjs = require('bcryptjs');
+
 const { generateJWT } = require("../helpers/generateJWT");
 const { googleVerify } = require("../helpers/google-verify");
+const { User } = require("../models");
 
 const login = async (req, res = response) => {
 
@@ -71,10 +72,7 @@ const googleSignIn = async (req, res = response) => {
                 msg: 'Hable con el admin, usuario bloqueado'
             });
         }
-
-
         // generar jwt
-
         const token = await generateJWT(user.id);
 
         return res.json({
